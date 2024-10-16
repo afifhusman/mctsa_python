@@ -2,6 +2,7 @@ import network
 import time
 from umqtt.simple import MQTTClient
 import machine
+import dht
 
 # Replace with your WiFi credentials
 WIFI_SSID = 'WIFI_SSID'
@@ -13,6 +14,11 @@ MQTT_PORT = 1883  # Use 8883 for SSL
 DEVICE_ID = 'XXX'
 DEVICE_TOKEN = 'XXX'  # Replace with your Qubitro device token
 MQTT_TOPIC = 'XXX'  # Replace with your specific topic
+
+
+#Set up DHT11 sensor
+DHT_PIN = machine.Pin(23)  #
+dht_sensor = dht.DHT11(DHT_PIN)
 
 # Function to connect to WiFi
 def connect_to_wifi():
@@ -39,6 +45,18 @@ def setup_mqtt():
     client = MQTTClient(DEVICE_ID, MQTT_BROKER, port=MQTT_PORT, user=DEVICE_ID, password=DEVICE_TOKEN, keepalive=60)
     return client
 
+# Function to read data from DHT11 sensor
+def read_dht11():
+    try:
+        dht_sensor.measure()
+        temperature = dht_sensor.temperature()
+        humidity = dht_sensor.humidity()
+        print(f'Temperature: {temperature}°C, Humidity: {humidity}%')
+        return temperature, humidity
+    except OSError as e:
+        print("Failed to read from DHT sensor:", e)
+        return None, None
+
 # Main function
 def main():
     # Connect to WiFi
@@ -56,14 +74,21 @@ def main():
         print("Failed to connect to MQTT broker:", e)
         return
 
-    # Example payload (JSON format)
-    payload = '{"temperature": 23.5, "humidity": 60}'
+    while True:
+        # Read temperature and humidity from DHT11 sensor
+        temperature, humidity = read_dht11()
+        
+        if temperature is not None and humidity is not None:
+            # Format payload as JSON
+            payload = '{"temperature": %s, "humidity": %s}' % (temperature, humidity)
+            
+            # Send the payload to the MQTT broker
+            send_mqtt_data(client, payload)
+        else:
+            print("Skipping MQTT publish due to sensor error")
 
-    # Send the payload to the MQTT broker
-    send_mqtt_data(client, payload)
-    
-    # Disconnect after sending the message
-    client.disconnect()
+        # Wait for a while before sending the next data (e.g., every 2 seconds)
+        time.sleep(525)
     
 if __name__ == '__main__':
     main()
