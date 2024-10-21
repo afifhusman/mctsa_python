@@ -97,7 +97,7 @@ try:
     subscribe(client, MQTT_TOPIC_LED)
     while True:
         # Read sensor data
-        #temperature, humidity, pressure = get_sensor_readings()
+        
         
         client.check_msg()
         
