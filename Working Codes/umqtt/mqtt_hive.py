@@ -86,6 +86,8 @@ def my_callback(topic, message):
     else:
         print('Unknown command')
 
+# program start here 
+
 try:
     connect_to_wifi()
     # Connect to MQTT broker, start MQTT client
