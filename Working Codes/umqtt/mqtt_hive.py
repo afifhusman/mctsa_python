@@ -1,3 +1,7 @@
+# Adapted from Rui Santos & Sara Santos - Random Nerd Tutorials
+# Complete project details at https://RandomNerdTutorials.com/raspberry-pi-pico-w-mqtt-micropython/
+
+
 import machine
 from machine import Pin
 from time import sleep
@@ -23,7 +27,7 @@ MQTT_SSL = True
 MQTT_CLIENT_ID = ubinascii.hexlify(machine.unique_id())  # Unique client ID based on ESP32's MAC address
 
 #MQTT Topics
-MQTT_TOPIC_PUB = "mctsa/env"
+MQTT_TOPIC_TEMP_HUMID = "mctsa/sensor"
 MQTT_TOPIC_LED = "mctsa/led"
 
 #led
@@ -49,13 +53,11 @@ def connect_mqtt():
 # Subcribe to MQTT topics
 def subscribe(client, topic):
     client.subscribe(topic)
-    print('Subscribe to topic:', topic)
+    print('Subscribed to topic:', topic)
           
 def publish_mqtt(topic, value):
     client.publish(topic, value)
-    print(topic)
-    print(value)
-    print("Publish Done")
+    print(f"Published {value} to topic {topic}")
 
 def connect_to_wifi():
     wifi = network.WLAN(network.STA_IF)
@@ -98,7 +100,7 @@ try:
         client.check_msg()
         
         # Publish as MQTT payload
-        publish_mqtt(MQTT_TOPIC_PUB, "50")
+        publish_mqtt(MQTT_TOPIC_TEMP_HUMID, "50")
 
         # Delay 10 seconds
         sleep(2)
