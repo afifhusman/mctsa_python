@@ -7,7 +7,7 @@ import machine
 from machine import Pin
 from time import sleep
 import ubinascii
-from umqtt.simple import MQTTClient
+from simple import MQTTClient
 
 # ======================================
 # MQTT configuration
